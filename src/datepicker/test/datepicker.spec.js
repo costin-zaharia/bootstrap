@@ -1,5 +1,5 @@
 describe('datepicker directive', function () {
-  var $rootScope, $compile, element;
+  var $rootScope, $compile, element, tabKeyCode = 9;
   beforeEach(module('ui.bootstrap.datepicker'));
   beforeEach(module('template/datepicker/datepicker.html'));
   beforeEach(module('template/datepicker/day.html'));
@@ -81,6 +81,12 @@ describe('datepicker directive', function () {
       expect(angular.element(button).hasClass('btn-info')).toBe( idx === index );
     });
   }
+    
+  function getKeyDownEvent (keyCode) {
+      var event = $.Event('keydown');
+      event.keyCode = keyCode;
+      return event;
+  };
 
   describe('', function () {
     beforeEach(function() {
@@ -934,7 +940,61 @@ describe('datepicker directive', function () {
         expect(inputEl).not.toHaveClass('ng-invalid');
         expect(inputEl).not.toHaveClass('ng-invalid-date');
       });
+    });
+      
+    describe('when tab key is pressed', function () {
+      it('should hide the popup if appendToBody and autoCloseOnTab are true',
+        inject(function (_$document_, datepickerPopupConfig) {
+          datepickerPopupConfig.autoCloseOnTab = true;
+          
+          var wrapElement = $compile('<div><input ng-model="date" datepicker-popup datepicker-append-to-body=true><div>')($rootScope);
+          $rootScope.$digest();
 
+          inputEl = wrapElement.find('input');
+          dropdownEl = _$document_.find('.dropdown-menu').last();
+          
+          var event = getKeyDownEvent(tabKeyCode);
+
+          inputEl.focus();
+          inputEl.trigger(event);
+          
+          expect(dropdownEl.css('display')).toBe('none');
+        }));
+      
+      it('should not hide the popup if appendToBody is true and autoCloseOnTab is false',
+        inject(function (_$document_, datepickerPopupConfig) {
+          datepickerPopupConfig.autoCloseOnTab = false;
+
+          var wrapElement = $compile('<div><input ng-model="date" datepicker-popup datepicker-append-to-body=true><div>')($rootScope);
+          $rootScope.$digest();
+
+          inputEl = wrapElement.find('input');
+          dropdownEl = _$document_.find('.dropdown-menu').last();
+
+          var event = getKeyDownEvent(tabKeyCode);
+
+          inputEl.focus();
+          inputEl.trigger(event);
+
+          expect(dropdownEl.css('display')).not.toBe('none');
+        }));
+      
+      it('should not hide the popup if appendToBody is false',
+        inject(function (datepickerPopupConfig) {
+          datepickerPopupConfig.autoCloseOnTab = true;
+
+          var wrapElement = $compile('<div><input ng-model="date" datepicker-popup datepicker-append-to-body=false><div>')($rootScope);
+          $rootScope.$digest();
+
+          assignElements(wrapElement);
+
+          var event = getKeyDownEvent(tabKeyCode);
+
+          inputEl.focus();
+          inputEl.trigger(event);
+
+          expect(dropdownEl.css('display')).not.toBe('none');
+        }));
     });
 
     describe('attribute `datepickerOptions`', function () {

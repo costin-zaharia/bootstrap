@@ -302,7 +302,8 @@ angular.module('ui.bootstrap.datepicker', ['ui.bootstrap.position'])
   closeText: 'Done',
   closeOnDateSelection: true,
   appendToBody: false,
-  showButtonBar: true
+  showButtonBar: true,
+  autoCloseOnTab: false
 })
 
 .directive('datepickerPopup', ['$compile', '$parse', '$document', '$position', 'dateFilter', 'datepickerPopupConfig',
@@ -403,6 +404,19 @@ function ($compile, $parse, $document, $position, dateFilter, datepickerPopupCon
       element.bind('input change keyup', function() {
         scope.$apply(function() {
           scope.date = ngModel.$modelValue;
+        });
+      });
+        
+      element.bind('keydown', function (event) {
+        if (!datepickerPopupConfig.autoCloseOnTab || !appendToBody) {
+          return;
+        }
+
+        scope.$apply(function () {
+          var tabKeyCode = 9;
+          if (event && event.keyCode && event.keyCode === tabKeyCode) {
+              scope.isOpen = false;
+          }
         });
       });
 
