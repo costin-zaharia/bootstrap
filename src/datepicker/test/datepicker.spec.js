@@ -86,7 +86,7 @@ describe('datepicker directive', function () {
       var event = $.Event('keydown');
       event.keyCode = keyCode;
       return event;
-  };
+  }
 
   describe('', function () {
     beforeEach(function() {
